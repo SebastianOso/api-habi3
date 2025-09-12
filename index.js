@@ -11,15 +11,15 @@ app.use(express.json());
 // Endpoint para probar SHOW TABLES
 app.get("/show-tables", async (req, res) => {
   try {
-    const [tables] = await db.execute("SHOW TABLES");
+    const [users] = await db.execute("SELECT * FROM user");
     res.json({
       success: true,
-      tables: tables.map(row => Object.values(row)[0]),
+      tables: users,
     });
   } catch (err) {
     res.status(500).json({
       success: false,
-      message: "Error al conectar o listar tablas",
+      message: "Error al conectar o listar usuarios",
       error: err.message,
     });
   }
