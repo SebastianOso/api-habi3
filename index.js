@@ -32,6 +32,10 @@ app.use("/api/users", usersRoutes);
 
 app.use("/api/missions",missionsRoutes);
 
+//Rutas para la relacion de usaru¿ios y sus misiones completadas con su recompensa asignada
+
+app.use("/api/missions", missionsRoutes)
+
 app.listen(PORT, () => {
   console.log(` Servidor corriendo en http://localhost:${PORT}`);
 });

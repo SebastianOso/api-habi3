@@ -18,4 +18,36 @@ LEFT JOIN rewards r ON mr.IDReward = r.IDReward;
   return rows;
 };
 
-module.exports = { getAllMissions };
+const getUserMission = async() => {
+    const [rows] = await db.execute(`
+SELECT 
+    u.IDUser,
+    u.name AS userName,
+    m.IDMission,
+    m.category AS missionCategory,
+    m.description AS missionDescription,
+    m.experience AS missionExperience,
+    r.IDReward,
+    r.name AS rewardName,
+    r.type AS rewardType,
+    r.value AS rewardValue,
+    e.IDEvidence,
+    e.dateOfSubmission,
+    e.validation AS evidenceValidated,
+    n.IDNotification,
+    n.description AS notificationDescription
+FROM userMission um
+JOIN user u ON um.IDUser = u.IDUser
+JOIN mission m ON um.IDMission = m.IDMission
+JOIN evidence e ON um.IDEvidence = e.IDEvidence
+JOIN notification n ON um.IDNotification = n.IDNotification
+LEFT JOIN missionRewards mr ON m.IDMission = mr.IDMission
+LEFT JOIN rewards r ON mr.IDReward = r.IDReward;
+`);
+    return rows; 
+};
+
+
+module.exports = { getAllMissions,getUserMission };
+
+
