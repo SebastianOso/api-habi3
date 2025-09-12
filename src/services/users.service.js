@@ -10,4 +10,9 @@ const getLoginUser = async (id) => {
   return rows;
 };
 
-module.exports = { getAllUsers, getLoginUser };
+const postSignupUser = async (name, email, gender, dateOfBirth, coins, password) => {
+  const [rows] = await db.execute("INSERT INTO user (name, email, gender, dateOfBirth, coins, password, deleted) VALUES (?,?,?,?,?,?,?)", [name, email, gender, dateOfBirth, coins, password, 0]);
+  return rows;
+};
+
+module.exports = { getAllUsers, getLoginUser, postSignupUser };
