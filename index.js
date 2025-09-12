@@ -1,5 +1,6 @@
 const express = require("express");
 const usersRoutes = require("./src/routes/users.routes");
+const missionsRoutes =require("./src/routes/mission.routes");
 const db = require("./database"); // importamos el pool
 
 const app = express();
@@ -27,6 +28,11 @@ app.get("/show-tables", async (req, res) => {
 // Rutas de usuarios
 app.use("/api/users", usersRoutes);
 
+//Rutas para misiones
+
+app.use("/api/missions",missionsRoutes);
+
 app.listen(PORT, () => {
   console.log(` Servidor corriendo en http://localhost:${PORT}`);
 });
+
