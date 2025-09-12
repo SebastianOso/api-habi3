@@ -29,8 +29,25 @@ const getStatsUser = async (id) => {
 };
 
 const postSignupUser = async (name, email, gender, dateOfBirth, coins, password) => {
-  const [rows] = await db.execute("INSERT INTO user (name, email, gender, dateOfBirth, coins, password, deleted) VALUES (?,?,?,?,?,?,?)", [name, email, gender, dateOfBirth, coins, password, 0]);
-  return rows;
+    try {
+    // Insertar usuario
+    const [result] = await db.execute(
+      "INSERT INTO user (name, email, gender, dateOfBirth, coins, password, deleted) VALUES (?,?,?,?,?,?,?)",
+      [name, email, gender, dateOfBirth, coins, password, 0]
+    );
+
+    const userId = result.insertId; // ID del usuario recién creado
+
+    // Insertar en tree vinculado a ese usuario
+    await db.execute(
+      "INSERT INTO tree (IDUser, level) VALUES (?, ?)",
+      [userId, 1] // Por defecto nivel 1
+    );
+
+    return { userId }; // Devuelve el ID del usuario creado
+  } catch (err) {
+    throw new Error(err.message);
+  }
 };
 
 module.exports = { getAllUsers, getLoginUser, postSignupUser, getStatsUser };
