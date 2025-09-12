@@ -25,6 +25,19 @@ const getLogin = async (req, res) => {
   }
 };
 
+const getStats = async (req, res) => {
+  try {
+    const id = req.params.id; 
+    const passkeys = await userService.getStatsUser(id);
+    res.json(passkeys);
+  } catch (err) {
+    res.status(500).json({
+      error: "Error obtaining user credcentials",
+      details: err.message,
+    });
+  }
+};
+
 const postSignup = async (req, res) => {
   try {
     const {name, email, gender, dateOfBirth, coins, password} = req.body;
@@ -38,4 +51,4 @@ const postSignup = async (req, res) => {
   }
 };
 
-module.exports = { getUsers, getLogin, postSignup };
+module.exports = { getUsers, getLogin, postSignup, getStats };

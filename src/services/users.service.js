@@ -10,9 +10,27 @@ const getLoginUser = async (id) => {
   return rows;
 };
 
+const getStatsUser = async (id) => {
+  const [rows] = await db.execute(
+    `SELECT 
+        u.IDUser,
+        u.name,
+        u.email,
+        u.coins,
+        t.level AS tree_level,
+        r.league AS ranking_league
+     FROM user u
+     LEFT JOIN tree t ON u.IDUser = t.IDUser
+     LEFT JOIN ranking r ON t.IDTree = r.IDTree
+     WHERE u.IDUser = ?`,
+    [id]
+  );
+  return rows;
+};
+
 const postSignupUser = async (name, email, gender, dateOfBirth, coins, password) => {
   const [rows] = await db.execute("INSERT INTO user (name, email, gender, dateOfBirth, coins, password, deleted) VALUES (?,?,?,?,?,?,?)", [name, email, gender, dateOfBirth, coins, password, 0]);
   return rows;
 };
 
-module.exports = { getAllUsers, getLoginUser, postSignupUser };
+module.exports = { getAllUsers, getLoginUser, postSignupUser, getStatsUser };
