@@ -47,7 +47,29 @@ LEFT JOIN rewards r ON mr.IDReward = r.IDReward;
     return rows; 
 };
 
+const postCompleteMissionUser = async (IDUser, IDMission) => {
+  // 1. Actualizar evidencia
+  await db.execute(
+    "UPDATE evidence e JOIN userMission um ON e.IDEvidence = um.IDEvidence SET e.validation = 1 WHERE um.IDUser = ? AND um.IDMission = ?",
+    [IDUser, IDMission]
+  );
 
-module.exports = { getAllMissions,getUserMission };
+  // 2. Buscar experiencia de la misión
+  const [mission] = await db.execute(
+    "SELECT experience FROM mission WHERE IDMission = ?",
+    [IDMission]
+  );
+
+  // 5. Actualizar experiencia del árbol del usuario
+  await db.execute(
+    "UPDATE tree SET level = level + ? WHERE IDUser = ?",
+    [mission[0].experience, IDUser]
+  );
+
+  return { message: "Misión completada y recompensas aplicadas." };
+};
+
+
+module.exports = { getAllMissions,getUserMission, postCompleteMissionUser };
 
 

@@ -24,5 +24,18 @@ const getUserMission = async (req, res) => {
   }
 };
 
+const postCompleteMission = async (req, res) => {
+  try {
+    const { IDMission, IDUser } = req.body;
+    const result = await missionService.postCompleteMissionUser(IDUser, IDMission);
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({
+      error: "Error al completar la misión",
+      details: err.message,
+    });
+  }
+};
 
-module.exports = { getMissions, getUserMission };
+
+module.exports = { getMissions, getUserMission, postCompleteMission};
