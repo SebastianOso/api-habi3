@@ -5,4 +5,9 @@ const getAllUsers = async () => {
   return rows;
 };
 
-module.exports = { getAllUsers };
+const getLoginUser = async (id) => {
+  const [rows] = await db.execute("SELECT email, password FROM user WHERE IDUser =?", [id]);
+  return rows;
+};
+
+module.exports = { getAllUsers, getLoginUser };

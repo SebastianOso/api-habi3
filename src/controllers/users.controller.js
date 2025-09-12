@@ -12,4 +12,17 @@ const getUsers = async (req, res) => {
   }
 };
 
-module.exports = { getUsers };
+const getLogin = async (req, res) => {
+  try {
+    const id = req.params.id; 
+    const passkeys = await userService.getLoginUser(id);
+    res.json(passkeys);
+  } catch (err) {
+    res.status(500).json({
+      error: "Error al obtener usuarios",
+      details: err.message,
+    });
+  }
+};
+
+module.exports = { getUsers, getLogin };
