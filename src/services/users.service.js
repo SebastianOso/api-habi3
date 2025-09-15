@@ -20,10 +20,6 @@ const getLoginUser = async (email, password) => {
 
   const user = rows[0];
 
-  //Debug
-  console.log("Password recibido:", password);
-  console.log("Hash en DB:", user.password);
-
   //Comparar contraseñas con bcrypt
   const isMatch = await bcrypt.compare(password, user.password); // OJO: usar "user.password"
 
