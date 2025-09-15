@@ -24,6 +24,26 @@ const getUserMission = async (req, res) => {
   }
 };
 
+
+const getUserMissions = async (req, res) => {
+  try {
+    const { id } = req.params; // ← ahora sacamos el ID de la URL
+    const userMission = await missionService.getUserMissions(id);
+
+    res.json({
+      success: true,
+      userId: id,
+      missions: userMission
+    });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: "Error al obtener misiones del usuario",
+      details: err.message,
+    });
+  }
+};
+
 const postCompleteMission = async (req, res) => {
   try {
     const { IDMission, IDUser } = req.body;
@@ -38,4 +58,4 @@ const postCompleteMission = async (req, res) => {
 };
 
 
-module.exports = { getMissions, getUserMission, postCompleteMission};
+module.exports = { getMissions, getUserMission, postCompleteMission, getUserMissions};
