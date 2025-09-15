@@ -1,13 +1,45 @@
 const db = require("../../database");
+const bcrypt = require("bcrypt");
 
 const getAllUsers = async () => {
   const [rows] = await db.execute("SELECT * FROM user");
   return rows;
 };
 
-const getLoginUser = async (id) => {
-  const [rows] = await db.execute("SELECT email, password FROM user WHERE IDUser =?", [id]);
-  return rows;
+
+const getLoginUser = async (email, password) => {
+  //Buscar usuario por correo
+  const [rows] = await db.execute(
+    "SELECT IDUser, Name, email, gender, dateOfBirth, coins, password FROM user WHERE email = ?",
+    [email]
+  );
+
+  if (rows.length === 0) {
+    throw new Error("Usuario no encontrado");
+  }
+
+  const user = rows[0];
+
+  //Debug
+  console.log("Password recibido:", password);
+  console.log("Hash en DB:", user.password);
+
+  //Comparar contraseñas con bcrypt
+  const isMatch = await bcrypt.compare(password, user.password); // OJO: usar "user.password"
+
+  if (!isMatch) {
+    throw new Error("Contraseña incorrecta");
+  }
+
+  // 3. Retornar datos del usuario (sin contraseña)
+  return {
+    id: user.IDUser,
+    name: user.Name,
+    email: user.email,
+    gender: user.gender,
+    dateOfBirth: user.dateOfBirth,
+    coins: user.coins
+  };
 };
 
 const getStatsUser = async (id) => {

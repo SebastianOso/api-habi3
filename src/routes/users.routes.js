@@ -7,7 +7,7 @@ const { getStats } = require("../controllers/users.controller");
 
 // GET /api/users
 router.get("/", getUsers);
-router.get("/login/:id", getLogin);
+router.post("/login", getLogin);
 router.get("/stats/:id", getStats);
 router.post("/signup", postSignup)
 
