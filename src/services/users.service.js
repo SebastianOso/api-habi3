@@ -56,12 +56,16 @@ const getStatsUser = async (id) => {
   return rows;
 };
 
+
 const postSignupUser = async (name, email, gender, dateOfBirth, coins, password) => {
-    try {
-    // Insertar usuario
+  try {
+    
+    const hashedPassword = await bcrypt.hash(password, 12); 
+
+    
     const [result] = await db.execute(
       "INSERT INTO user (name, email, gender, dateOfBirth, coins, password, deleted) VALUES (?,?,?,?,?,?,?)",
-      [name, email, gender, dateOfBirth, coins, password, 0]
+      [name, email, gender, dateOfBirth, coins, hashedPassword, 0]
     );
 
     const userId = result.insertId; // ID del usuario recién creado
@@ -77,5 +81,4 @@ const postSignupUser = async (name, email, gender, dateOfBirth, coins, password)
     throw new Error(err.message);
   }
 };
-
 module.exports = { getAllUsers, getLoginUser, postSignupUser, getStatsUser };
