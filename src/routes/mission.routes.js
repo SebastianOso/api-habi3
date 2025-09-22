@@ -6,7 +6,7 @@ const { getUserMission } = require("../controllers/mission.controller");
 const { postCompleteMission } = require("../controllers/mission.controller");
 
 // GET /api/missions
-router.get("/", getMissions);
+router.get("/:id", getMissions);
 
 //GET /api/userMissions
 
