@@ -2,6 +2,7 @@ const express = require("express");
 const usersRoutes = require("./src/routes/users.routes");
 const missionsRoutes =require("./src/routes/mission.routes");
 const quizzesRoutes =require("./src/routes/quizzes.routes");
+const shopRoutes =require("./src/routes/shop.routes");
 const db = require("./database"); // importamos el pool
 
 const app = express();
@@ -40,6 +41,9 @@ app.use("/api/missions", missionsRoutes)
 
 // Rutas de usuarios
 app.use("/api/quizzes", quizzesRoutes);
+
+// Rutas de shop?
+app.use("/api/shop", shopRoutes);
 
 app.listen(PORT, () => {
   console.log(` Servidor corriendo en http://localhost:${PORT}`);
