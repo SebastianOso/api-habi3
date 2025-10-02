@@ -81,4 +81,20 @@ const postSignupUser = async (name, email, gender, dateOfBirth, coins, password)
     throw new Error(err.message);
   }
 };
-module.exports = { getAllUsers, getLoginUser, postSignupUser, getStatsUser };
+
+const editUserInfo = async (id, name, email, gender, dateOfBirth) => {
+  try {
+    const [result] = await db.execute(
+      `UPDATE user 
+       SET name = ?, email = ?, gender = ?, dateOfBirth = ? 
+       WHERE IDUser = ?`,
+      [name, email, gender, dateOfBirth, id]
+    );
+
+    return { affectedRows: result.affectedRows }; // Te dice cuántos registros se actualizaron
+  } catch (err) {
+    throw new Error(err.message);
+  }
+};
+
+module.exports = { getAllUsers, getLoginUser, postSignupUser, getStatsUser, editUserInfo };

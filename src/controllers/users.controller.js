@@ -70,4 +70,18 @@ const postSignup = async (req, res) => {
   }
 };
 
-module.exports = { getUsers, getLogin, postSignup, getStats };
+const editUser = async (req, res) => {
+  try {
+    const {name, email, gender, dateOfBirth} = req.body;
+    const { id } = req.params;
+    const rows = await userService.editUserInfo(id, name, email, gender, dateOfBirth);
+    res.json(rows);
+  } catch (err) {
+    res.status(500).json({
+      error: "Error al obtener usuarios",
+      details: err.message,
+    });
+  }
+};
+
+module.exports = { getUsers, getLogin, postSignup, getStats, editUser };
