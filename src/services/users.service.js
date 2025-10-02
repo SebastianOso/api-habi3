@@ -97,4 +97,22 @@ const editUserInfo = async (id, name, email, gender, dateOfBirth) => {
   }
 };
 
-module.exports = { getAllUsers, getLoginUser, postSignupUser, getStatsUser, editUserInfo };
+const changeUserPassword = async (id, password) => {
+  try {
+    // Hashear nueva contraseña
+    const hashedPassword = await bcrypt.hash(password, 12);
+
+    // Actualizar solo el campo password
+    const [result] = await db.execute(
+      `UPDATE user 
+       SET password = ? 
+       WHERE IDUser = ?`,
+      [hashedPassword, id]
+    );
+
+    return { affectedRows: result.affectedRows }; // 1 si se actualizó, 0 si no encontró el usuario
+  } catch (err) {
+    throw new Error(err.message);
+  }
+};
+module.exports = { getAllUsers, getLoginUser, postSignupUser, getStatsUser, editUserInfo, changeUserPassword };

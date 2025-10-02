@@ -84,4 +84,19 @@ const editUser = async (req, res) => {
   }
 };
 
-module.exports = { getUsers, getLogin, postSignup, getStats, editUser };
+const changepasswd = async (req, res) => {
+  try {
+    const {password} = req.body;
+    const { id } = req.params;
+    const rows = await userService.changeUserPassword(id, password);
+    res.json(rows);
+  } catch (err) {
+    res.status(500).json({
+      error: "Error al obtener usuarios",
+      details: err.message,
+    });
+  }
+};
+
+
+module.exports = { getUsers, getLogin, postSignup, getStats, editUser, changepasswd };
