@@ -60,7 +60,10 @@ const getStatsUser = async (id) => {
 const postSignupUser = async (name, email, gender, dateOfBirth, coins, password) => {
   try {
     
-    const hashedPassword = await bcrypt.hash(password, 12); 
+    let hashedPassword = null;
+    if (password) {
+      hashedPassword = await bcrypt.hash(password, 12);
+    }
 
     
     const [result] = await db.execute(
