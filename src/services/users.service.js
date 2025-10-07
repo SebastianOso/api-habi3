@@ -143,4 +143,24 @@ const getMissionsSummaryByUser = async (id) => {
   return summary;
 };
 
-module.exports = { getAllUsers, getLoginUser, postSignupUser, getStatsUser, editUserInfo, changeUserPassword,  getMissionsSummaryByUser};
+const getUserRewardsById = async (id) => {
+  const [rows] = await db.execute(
+    `SELECT 
+        r.IDReward,
+        r.name,
+        r.description,
+        r.type,
+        r.available,
+        r.value,
+        ur.IDUserReward
+     FROM userRewards ur
+     INNER JOIN rewards r ON ur.IDReward = r.IDReward
+     WHERE ur.IDUser = ? 
+       AND r.type IN ('monetary', 'nonMonetary')
+     ORDER BY ur.IDUserReward DESC`,
+    [id]
+  );
+  return rows;
+};
+
+module.exports = { getAllUsers, getLoginUser, postSignupUser, getStatsUser, editUserInfo, changeUserPassword,  getMissionsSummaryByUser, getUserRewardsById};
