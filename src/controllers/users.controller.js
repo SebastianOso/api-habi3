@@ -98,5 +98,17 @@ const changepasswd = async (req, res) => {
   }
 };
 
+const getMissionsSummary = async (req, res) => {
+  try {
+    const id = req.params.id; 
+    const summary = await userService.getMissionsSummaryByUser(id);
+    res.json(summary);
+  } catch (err) {
+    res.status(500).json({
+      error: "Error obtaining missions summary",
+      details: err.message,
+    });
+  }
+};
 
-module.exports = { getUsers, getLogin, postSignup, getStats, editUser, changepasswd };
+module.exports = { getUsers, getLogin, postSignup, getStats, editUser, changepasswd, getMissionsSummary};

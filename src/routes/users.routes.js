@@ -6,6 +6,7 @@ const { postSignup } = require("../controllers/users.controller");
 const { getStats } = require("../controllers/users.controller");
 const { editUser } = require("../controllers/users.controller");
 const { changepasswd } = require("../controllers/users.controller");
+const { getMissionsSummary } = require("../controllers/users.controller");
 
 // GET /api/users
 router.get("/", getUsers);
@@ -14,6 +15,7 @@ router.get("/stats/:id", getStats);
 router.post("/signup", postSignup)
 router.put("/edit/:id", editUser);
 router.patch("/changepasswd/:id", changepasswd)
+router.get("/stats2/:id", getMissionsSummary)
 
 
 module.exports = router;
