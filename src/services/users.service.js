@@ -29,7 +29,7 @@ const getLoginUser = async (email, password) => {
 
   // 3. Retornar datos del usuario (sin contraseña)
   return {
-    id: user.IDUser,
+    userId: user.IDUser,
     name: user.Name,
     email: user.email,
     gender: user.gender,
