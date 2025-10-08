@@ -126,22 +126,40 @@ const getMissionsSummaryByUser = async (id) => {
         SUM(m.value) AS total_value
      FROM userMissions um
      INNER JOIN mission m ON um.IDMission = m.IDMission
-     WHERE um.IDUser = ? 
-       AND um.status = 1
-       AND m.category IN ('Awareness', 'Consumption', 'Energy', 'Nature', 'Transport', 'Waste', 'Water')
+     WHERE um.IDUser = ? AND um.status = 1
      GROUP BY m.category
      ORDER BY m.category`,
     [id]
   );
-  
-  // Transformar el resultado en un objeto plano
-  const summary = rows.reduce((acc, row) => {
-    acc[row.category] = row.total_value;
-    return acc;
-  }, {});
-  
+
+  // Valores por defecto - siempre se retornan todas las categorías
+  const summary = {
+    Awareness: "0",
+    Consumption: "0",
+    Energy: "0",
+    Nature: "0",
+    Transport: "0",
+    Waste: "0",
+    Water: "0"
+  };
+
+  // Actualizar con los valores reales de la base de datos
+  rows.forEach(row => {
+    if (row.category) {
+      // Normalizar la categoría: primera letra mayúscula, resto minúsculas
+      const normalizedCategory = row.category.charAt(0).toUpperCase() + row.category.slice(1).toLowerCase();
+      
+      // Solo actualizar si la categoría normalizada existe en nuestro objeto summary
+      if (summary.hasOwnProperty(normalizedCategory)) {
+        summary[normalizedCategory] = (row.total_value || 0).toString();
+      }
+    }
+  });
+
   return summary;
 };
+
+
 
 const getUserRewardsById = async (id) => {
   const [rows] = await db.execute(
