@@ -45,11 +45,9 @@ const getStatsUser = async (id) => {
         u.name,
         u.email,
         u.coins,
-        t.level AS tree_level,
-        r.league AS ranking_league
+        t.level AS tree_level
      FROM user u
      LEFT JOIN tree t ON u.IDUser = t.IDUser
-     LEFT JOIN ranking r ON t.IDTree = r.IDTree
      WHERE u.IDUser = ?`,
     [id]
   );
