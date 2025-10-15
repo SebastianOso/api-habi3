@@ -163,4 +163,17 @@ const getUserRewards = async (req, res) => {
   }
 };
 
-module.exports = { getUsers, getLogin, postSignup, getStats, editUser, changepasswd, getMissionsSummary, getUserRewards, getLoginGoogle};
+const getLeaderboard = async (req, res) => {
+  try {
+    const leaderboard = await userService.getLeaderboardS();
+    res.json(leaderboard);
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: "Error al obtener leaderboard",
+      details: err.message
+    });
+  }
+};
+
+module.exports = { getUsers, getLogin, postSignup, getStats, editUser, changepasswd, getMissionsSummary, getUserRewards, getLoginGoogle, getLeaderboard};

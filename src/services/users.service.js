@@ -199,4 +199,22 @@ const getUserRewardsById = async (id) => {
   return rows;
 };
 
-module.exports = { getAllUsers, getLoginUser, postSignupUser, getStatsUser, editUserInfo, changeUserPassword,  getMissionsSummaryByUser, getUserRewardsById, getLoginUserGoogle};
+const getLeaderboardS = async () => {
+  const [rows] = await db.execute(`
+    SELECT 
+      u.name,
+      t.level,
+      l.league
+    FROM user u
+    INNER JOIN tree t ON u.IDUser = t.IDUser
+    LEFT JOIN ranking r ON t.IDTree = r.IDTree
+    LEFT JOIN Leagues l ON r.ID_league = l.ID_league
+    WHERE u.deleted = 0
+    ORDER BY t.level DESC, u.name ASC
+    LIMIT 10
+  `);
+
+  return rows;
+};
+
+module.exports = { getAllUsers, getLoginUser, postSignupUser, getStatsUser, editUserInfo, changeUserPassword,  getMissionsSummaryByUser, getUserRewardsById, getLoginUserGoogle, getLeaderboardS};

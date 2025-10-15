@@ -9,6 +9,7 @@ const { changepasswd } = require("../controllers/users.controller");
 const { getMissionsSummary } = require("../controllers/users.controller");
 const { getUserRewards } = require("../controllers/users.controller");
 const { getLoginGoogle } = require("../controllers/users.controller");
+const { getLeaderboard } = require("../controllers/users.controller");
 
 // GET /api/users
 router.get("/", getUsers);
@@ -20,6 +21,7 @@ router.put("/edit/:id", editUser);
 router.patch("/changepasswd/:id", changepasswd)
 router.get("/stats2/:id", getMissionsSummary)
 router.get("/rewards/:id", getUserRewards)
+router.get("/leaderboard", getLeaderboard)
 
 
 module.exports = router;
