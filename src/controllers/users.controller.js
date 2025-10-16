@@ -28,18 +28,31 @@ const getLogin = async (req, res) => {
     // Llamar al servicio
     const user = await userService.getLoginUser(email, password);
 
+    // se generan tokens, uno es el principal para las peticiones y
+    // el otro es para refrescar este token principal por su duración
+    const accessToken = generateAccessToken(user);
+    const refreshToken = generateRefreshToken(user);
+
+    //guardar el refresh token en la base de datos
+    await db.execute(
+      "UPDATE user SET refreshToken = ? WHERE IDUser = ?",
+      [refreshToken, user.userId]
+    );
+
+
     // Respuesta exitosa
     res.json({
       success: true,
       message: "✅ Login exitoso",
       user,
+      tokens: { accessToken, refreshToken },
     });
 
   } catch (err) {
     res.status(401).json({
       success: false,
       message: "❌ Credenciales inválidas",
-      details: err.message, // opcional
+      details: err.message,
     });
   }
 };
