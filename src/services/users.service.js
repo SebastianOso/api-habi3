@@ -266,7 +266,49 @@ const getInventoryByUser = async (userId) => {
   return inventoryWithUrls;
 };
 
+const useItemByUser = async (idUser, idItem) => {
+
+  await db.execute(
+    `UPDATE inventory 
+     SET status = 0 
+     WHERE IDUser = ? AND status = 1`,
+    [idUser]
+  );
+
+  const [updateResult] = await db.execute(
+    `UPDATE inventory 
+     SET status = 1 
+     WHERE IDUser = ? AND IDItem = ?`,
+    [idUser, idItem]
+  );
+
+  if (updateResult.affectedRows === 0) {
+    throw new Error("El ítem no existe en el inventario del usuario");
+  }
+
+  const [rows] = await db.execute(
+    `SELECT image_name FROM shop WHERE IDItem = ?`,
+    [idItem]
+  );
+
+  if (rows.length === 0) {
+    throw new Error("El ítem no existe en la tienda");
+  }
+
+  const imageName = rows[0].image_name;
+
+  await db.execute(
+    `UPDATE user 
+     SET item = ? 
+     WHERE IDUser = ?`,
+    [imageName, idUser]
+  );
+
+  return { idUser, idItem, imageName };
+};
+
 
 module.exports = { getAllUsers, getLoginUser, postSignupUser, getStatsUser, 
                   editUserInfo, changeUserPassword,  getMissionsSummaryByUser, 
-                  getUserRewardsById, getLoginUserGoogle, getLeaderboardS, getInventoryByUser};
+                  getUserRewardsById, getLoginUserGoogle, getLeaderboardS, getInventoryByUser,
+                  useItemByUser};

@@ -195,4 +195,34 @@ const getInventory = async (req, res) => {
   }
 };
 
-module.exports = { getUsers, getLogin, postSignup, getStats, editUser, changepasswd, getMissionsSummary, getUserRewards, getLoginGoogle, getLeaderboard, getInventory};
+const useItem = async (req, res) => {
+  try {
+    const { IDUser, IDItem } = req.body;
+
+    if (!IDUser || !IDItem) {
+      return res.status(400).json({
+        success: false,
+        message: "Faltan parámetros: IDUser o IDItem",
+      });
+    }
+
+    const result = await userService.useItemByUser(IDUser, IDItem);
+
+    res.status(200).json({
+      success: true,
+      message: "Item usado correctamente",
+      data: result,
+    });
+  } catch (err) {
+    console.error("Error en useItem:", err);
+    res.status(500).json({
+      success: false,
+      message: "Error al usar el ítem",
+      details: err.message,
+    });
+  }
+};
+
+module.exports = { getUsers, getLogin, postSignup, getStats, editUser, 
+                    changepasswd, getMissionsSummary, getUserRewards, 
+                    getLoginGoogle, getLeaderboard, getInventory, useItem};
