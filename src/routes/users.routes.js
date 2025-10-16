@@ -10,6 +10,7 @@ const { getMissionsSummary } = require("../controllers/users.controller");
 const { getUserRewards } = require("../controllers/users.controller");
 const { getLoginGoogle } = require("../controllers/users.controller");
 const { getLeaderboard } = require("../controllers/users.controller");
+const { getInventory } = require("../controllers/users.controller");
 
 // GET /api/users
 router.get("/", getUsers);
@@ -22,6 +23,7 @@ router.patch("/changepasswd/:id", changepasswd)
 router.get("/stats2/:id", getMissionsSummary)
 router.get("/rewards/:id", getUserRewards)
 router.get("/leaderboard", getLeaderboard)
+router.get("/inventory/:id", getInventory)
 
 
 module.exports = router;

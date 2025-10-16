@@ -1,5 +1,20 @@
 const db = require("../../database");
 const bcrypt = require("bcrypt");
+const AWS = require("aws-sdk");
+
+const AWS_BUCKET = process.env.AWS_BUCKET;
+const AWS_REGION = process.env.AWS_REGION;
+const AWS_ACCESS_KEY_ID = process.env.AWS_ACCESS_KEY_ID;
+const AWS_SECRET_ACCESS_KEY = process.env.AWS_SECRET_ACCESS_KEY;
+
+AWS.config.update({
+  signatureVersion: "v4",
+  region: AWS_REGION,
+  accessKeyId: AWS_ACCESS_KEY_ID,
+  secretAccessKey: AWS_SECRET_ACCESS_KEY
+});
+
+const s3 = new AWS.S3();
 
 const getAllUsers = async () => {
   const [rows] = await db.execute("SELECT * FROM user");
@@ -217,4 +232,41 @@ const getLeaderboardS = async () => {
   return rows;
 };
 
-module.exports = { getAllUsers, getLoginUser, postSignupUser, getStatsUser, editUserInfo, changeUserPassword,  getMissionsSummaryByUser, getUserRewardsById, getLoginUserGoogle, getLeaderboardS};
+const getInventoryByUser = async (userId) => {
+  const query = `
+    SELECT 
+      i.IDInventory,
+      i.IDUser,
+      i.IDItem,
+      i.Quantity,
+      i.status,
+      s.name AS item_name,
+      s.state,
+      s.category,
+      s.price,
+      s.image_name
+    FROM inventory i
+    INNER JOIN shop s ON i.IDItem = s.IDItem
+    WHERE i.IDUser = ?
+  `;
+
+  const [rows] = await db.execute(query, [userId]);
+
+  // Generar URL firmada de S3
+  const inventoryWithUrls = await Promise.all(
+    rows.map(async (item) => {
+      if (!item.image_name) return { ...item, imageUrl: null };
+
+      const params = { Bucket: AWS_BUCKET, Key: item.image_name, Expires: 3600 };
+      const signedUrl = s3.getSignedUrl("getObject", params);
+      return { ...item, imageUrl: signedUrl };
+    })
+  );
+
+  return inventoryWithUrls;
+};
+
+
+module.exports = { getAllUsers, getLoginUser, postSignupUser, getStatsUser, 
+                  editUserInfo, changeUserPassword,  getMissionsSummaryByUser, 
+                  getUserRewardsById, getLoginUserGoogle, getLeaderboardS, getInventoryByUser};

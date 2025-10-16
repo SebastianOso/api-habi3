@@ -176,4 +176,23 @@ const getLeaderboard = async (req, res) => {
   }
 };
 
-module.exports = { getUsers, getLogin, postSignup, getStats, editUser, changepasswd, getMissionsSummary, getUserRewards, getLoginGoogle, getLeaderboard};
+const getInventory = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const inventory = await userService.getInventoryByUser(id);
+
+    res.status(200).json({
+      success: true,
+      data: inventory
+    });
+  } catch (err) {
+    console.error("❌ Error en getInventory:", err);
+    res.status(500).json({
+      success: false,
+      message: "Error al obtener inventario",
+      details: err.message
+    });
+  }
+};
+
+module.exports = { getUsers, getLogin, postSignup, getStats, editUser, changepasswd, getMissionsSummary, getUserRewards, getLoginGoogle, getLeaderboard, getInventory};
