@@ -92,27 +92,34 @@ const getStatsUser = async (id) => {
 
 const postSignupUser = async (name, email, gender, dateOfBirth, coins, password) => {
   try {
-    
+    // Encriptar solo si hay contraseña
     let hashedPassword = null;
     if (password) {
       hashedPassword = await bcrypt.hash(password, 12);
     }
 
-    
     const [result] = await db.execute(
-      "INSERT INTO user (name, email, gender, dateOfBirth, coins, password, deleted) VALUES (?,?,?,?,?,?,?)",
-      [name, email, gender, dateOfBirth, coins, hashedPassword, 0]
+      `INSERT INTO user (name, email, gender, dateOfBirth, coins, password, deleted)
+       VALUES (?, ?, ?, ?, ?, ?, 0)`,
+      [
+        name ?? null,
+        email,
+        gender ?? null,
+        dateOfBirth ?? null,
+        coins ?? null,
+        hashedPassword ?? null
+      ]
     );
 
-    const userId = result.insertId; // ID del usuario recién creado
+    const userId = result.insertId;
 
-    // Insertar en tree vinculado a ese usuario
+    // Insertar registro base en árbol
     await db.execute(
-      "INSERT INTO tree (IDUser, level) VALUES (?, ?)",
-      [userId, 1] // Por defecto nivel 1
+      `INSERT INTO tree (IDUser, level) VALUES (?, 1)`,
+      [userId]
     );
 
-    return { userId }; // Devuelve el ID del usuario creado
+    return { userId };
   } catch (err) {
     throw new Error(err.message);
   }

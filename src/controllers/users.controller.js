@@ -98,16 +98,47 @@ const getStats = async (req, res) => {
 
 const postSignup = async (req, res) => {
   try {
-    const {name, email, gender, dateOfBirth, coins, password} = req.body;
-    const rows = await userService.postSignupUser(name, email, gender, dateOfBirth, coins, password);
-    res.json(rows);
+    const { name, email, gender, dateOfBirth, coins, password } = req.body;
+
+    // Validar que el correo sí venga
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: "El campo 'email' es obligatorio.",
+      });
+    }
+
+    // Si no vienen los demás campos, se asigna null
+    const safeName = name ?? null;
+    const safeGender = gender ?? null;
+    const safeDateOfBirth = dateOfBirth ?? null;
+    const safeCoins = coins ?? null;
+    const safePassword = password ?? null;
+
+    // Llamamos al servicio con los valores seguros
+    const rows = await userService.postSignupUser(
+      safeName,
+      email,
+      safeGender,
+      safeDateOfBirth,
+      safeCoins,
+      safePassword
+    );
+
+    res.status(201).json({
+      success: true,
+      message: "Usuario registrado correctamente",
+      data: rows,
+    });
   } catch (err) {
     res.status(500).json({
-      error: "Error al obtener usuarios",
+      success: false,
+      message: "Error al registrar usuario",
       details: err.message,
     });
   }
 };
+
 
 const editUser = async (req, res) => {
   try {
