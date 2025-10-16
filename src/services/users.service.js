@@ -66,7 +66,7 @@ const getLoginUserGoogle = async (email) => {
   const user = rows[0];
 
   return {
-    userId: user.IDUser,
+    id: user.IDUser,
     name: user.Name,
     email: user.email,
     coins: user.coins
