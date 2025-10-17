@@ -1,4 +1,5 @@
 const userService = require("../services/users.service");
+const tokenService = require('../services/token.service');
 
 const getUsers = async (req, res) => {
   try {
@@ -11,6 +12,76 @@ const getUsers = async (req, res) => {
     });
   }
 };
+
+const getLoginJWT = async (req, res) => {
+    try {
+        const { email, password } = req.body;
+
+        if (!email || !password) {
+            return res.status(400).json({
+                success: false,
+                message: 'Faltan credenciales',
+            });
+        }
+
+        const user = await userService.getLoginUser(email, password);
+        const accessToken = tokenService.generateAccessToken(user);
+        const refreshToken = await tokenService.generateRefreshToken(user);
+
+        res.json({
+            success: true,
+            message: '✅ Login exitoso',
+            user,
+            accessToken,
+            refreshToken,
+        });
+    } catch (err) {
+        res.status(401).json({
+            success: false,
+            message: '❌ Credenciales inválidas',
+            details: err.message,
+        });
+    }
+};
+
+const getLoginGoogleJWT = async (req, res) => {
+    try {
+        const { email } = req.body;
+
+        if (!email) {
+            return res.status(400).json({
+                success: false,
+                message: 'Faltan credenciales',
+            });
+        }
+
+        const user = await userService.getLoginUserGoogle(email);
+        const accessToken = tokenService.generateAccessToken(user);
+        const refreshToken = await tokenService.generateRefreshToken(user);
+
+        const responseUser = {
+            userId: user.id,
+            name: user.name,
+            email: user.email,
+            coins: user.coins,
+        };
+
+        res.json({
+            success: true,
+            message: '✅ Login exitoso',
+            user: responseUser,
+            accessToken,
+            refreshToken,
+        });
+    } catch (err) {
+        res.status(401).json({
+            success: false,
+            message: '❌ Credenciales inválidas',
+            details: err.message,
+        });
+    }
+};
+
 
 
 const getLogin = async (req, res) => {
@@ -28,31 +99,18 @@ const getLogin = async (req, res) => {
     // Llamar al servicio
     const user = await userService.getLoginUser(email, password);
 
-    // se generan tokens, uno es el principal para las peticiones y
-    // el otro es para refrescar este token principal por su duración
-    const accessToken = generateAccessToken(user);
-    const refreshToken = generateRefreshToken(user);
-
-    //guardar el refresh token en la base de datos
-    await db.execute(
-      "UPDATE user SET refreshToken = ? WHERE IDUser = ?",
-      [refreshToken, user.userId]
-    );
-
-
     // Respuesta exitosa
     res.json({
       success: true,
       message: "✅ Login exitoso",
       user,
-      tokens: { accessToken, refreshToken },
     });
 
   } catch (err) {
     res.status(401).json({
       success: false,
       message: "❌ Credenciales inválidas",
-      details: err.message,
+      details: err.message, // opcional
     });
   }
 };
@@ -267,6 +325,69 @@ const useItem = async (req, res) => {
   }
 };
 
+const refreshToken = async (req, res) => {
+    try {
+        const { refreshToken } = req.body;
+        console.log('Refresh token received:', refreshToken); // Debug
+        if (!refreshToken) {
+            return res.status(400).json({
+                success: false,
+                message: 'Falta el refresh token',
+            });
+        }
+
+        const { decoded, expiresAt } = await tokenService.verifyRefreshToken(refreshToken);
+        console.log('Decoded refresh token:', decoded); // Debug
+        const user = { userId: decoded.userId, email: decoded.email }; // Use userId
+        const newAccessToken = tokenService.generateAccessToken(user);
+        let newRefreshToken = refreshToken;
+        if (tokenService.shouldRenewRefreshToken(expiresAt)) {
+            console.log('Renewing refresh token'); // Debug
+            await tokenService.invalidateRefreshToken(refreshToken);
+            newRefreshToken = await tokenService.generateRefreshToken(user);
+        }
+
+        res.json({
+            success: true,
+            accessToken: newAccessToken,
+            refreshToken: newRefreshToken,
+        });
+    } catch (err) {
+        console.error('Refresh token error:', err.message); // Debug
+        res.status(401).json({
+            success: false,
+            message: '❌ Refresh token inválido o expirado',
+            details: err.message,
+        });
+    }
+};
+const logout = async (req, res) => {
+    try {
+        const { refreshToken } = req.body;
+
+        if (!refreshToken) {
+            return res.status(400).json({
+                success: false,
+                message: 'Falta el refresh token',
+            });
+        }
+
+        await tokenService.invalidateRefreshToken(refreshToken);
+        res.json({
+            success: true,
+            message: '✅ Sesión cerrada exitosamente',
+        });
+    } catch (err) {
+        res.status(500).json({
+            success: false,
+            message: 'Error al cerrar sesión',
+            details: err.message,
+        });
+    }
+};
+
+
 module.exports = { getUsers, getLogin, postSignup, getStats, editUser, 
                     changepasswd, getMissionsSummary, getUserRewards, 
-                    getLoginGoogle, getLeaderboard, getInventory, useItem};
+                    getLoginGoogle, getLeaderboard, getInventory, useItem,
+                    getLoginGoogleJWT, getLoginJWT, refreshToken, logout};
