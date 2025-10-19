@@ -6,8 +6,19 @@ const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET;
 const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET;
 const ACCESS_TOKEN_EXPIRES = process.env.ACCESS_TOKEN_EXPIRES;
 const REFRESH_TOKEN_EXPIRES = process.env.REFRESH_TOKEN_EXPIRES;
-const REFRESH_TOKEN_RENEWAL_THRESHOLD = process.env.REFRESH_TOKEN_RENEWAL_THRESHOLD;
+const REFRESH_TOKEN_RENEWAL_THRESHOLD = parseInt(process.env.REFRESH_TOKEN_RENEWAL_THRESHOLD, 10);
 
+const parseExpirationToSeconds = (expiration) => {
+    const value = parseInt(expiration, 10);
+    const unit = expiration.slice(-1);
+    switch (unit) {
+        case 's': return value;
+        case 'm': return value * 60;
+        case 'h': return value * 3600;
+        case 'd': return value * 86400;
+        default: return 7 * 86400;
+    }
+};
 
 const generateAccessToken = (user) => {
     return jwt.sign(
@@ -24,13 +35,17 @@ const generateRefreshToken = async (user) => {
         { expiresIn: REFRESH_TOKEN_EXPIRES }
     );
 
-    // Store refresh token in the database
+    const expiresInSeconds = parseExpirationToSeconds(REFRESH_TOKEN_EXPIRES);
+    const now = Date.now();
+    const expiresAtMs = now + (expiresInSeconds * 1000);
+    const expiresAt = new Date(expiresAtMs);
+
     await db.execute(
-        'INSERT INTO refresh_tokens (userId, token, expiresAt) VALUES (?, ?, DATE_ADD(NOW(), INTERVAL 7 DAY))',
-        [user.userId, refreshToken]
+        'INSERT INTO refresh_tokens (userId, token, expiresAt) VALUES (?, ?, ?)',
+        [user.userId, refreshToken, expiresAt]
     );
 
-    return refreshToken;
+    return { refreshToken, expiresAt };
 };
 
 const verifyAccessToken = (token) => {
@@ -53,7 +68,7 @@ const verifyRefreshToken = async (token) => {
             throw new Error('Invalid or expired refresh token');
         }
 
-        return { decoded, expiresAt: rows[0].expiresAt }; // Return object with decoded and expiresAt
+        return { decoded, expiresAt: rows[0].expiresAt };
     } catch (err) {
         throw new Error('Invalid refresh token: ' + err.message);
     }
@@ -65,7 +80,7 @@ const invalidateRefreshToken = async (token) => {
 
 const shouldRenewRefreshToken = (expiresAt) => {
     const now = new Date();
-    const timeLeft = (new Date(expiresAt) - now) / 1000; // Time left in seconds
+    const timeLeft = (new Date(expiresAt) - now) / 1000;
     return timeLeft < REFRESH_TOKEN_RENEWAL_THRESHOLD;
 };
 
