@@ -231,7 +231,7 @@ const useItem = async (req, res) => {
     const { IDUser, IDItem } = req.body;
 
     if  (!IDUser || IDItem === undefined || IDItem === null)  {
-      return res.sstatus(400).json({
+      return res.status(400).json({
         success: false,
         message: "Faltan parámetros: IDUser o IDItem",
       });
