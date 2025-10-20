@@ -14,6 +14,7 @@ const { getInventory } = require("../controllers/users.controller");
 const { useItem } = require("../controllers/users.controller");
 const { refreshToken } = require("../controllers/users.controller");
 const { logout } = require("../controllers/users.controller");
+const { getActiveItem } = require("../controllers/users.controller");
 
 // GET /api/users
 router.get("/", getUsers);
@@ -30,6 +31,7 @@ router.get("/leaderboard", getLeaderboard)
 router.get("/inventory/:id", getInventory)
 router.post("/useitem", useItem);
 router.post('/users/logout', logout);
+router.get("/activeitem/:id", getActiveItem)
 
 
 module.exports = router;
