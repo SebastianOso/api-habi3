@@ -223,9 +223,10 @@ const postCompleteMissionUser = async (IDUser, IDMission) => {
       [IDMission]
     );
 
-    // 6. Insertar rewards en userRewards y sumar coins si es monetary
+    // 6. Insertar rewards en userRewards y sumar coins o tree level según el tipo
     const userRewards = [];
     let totalCoinsAdded = 0;
+    let totalTreeLevelAdded = 0;
 
     for (const reward of rewards) {
       try {
@@ -257,6 +258,11 @@ const postCompleteMissionUser = async (IDUser, IDMission) => {
           
           totalCoinsAdded += rewardValue;
         }
+        
+        // Si la recompensa es de tipo "nonmonetary", sumar el value al level del tree
+        if (rewardType === "nonmonetary" && rewardValue > 0) {
+          totalTreeLevelAdded += rewardValue;
+        }
 
       } catch (rewardError) {
         // Si hay error (por ejemplo, reward duplicada), continúa con la siguiente
@@ -270,15 +276,18 @@ const postCompleteMissionUser = async (IDUser, IDMission) => {
       [IDUser]
     );
 
+    // Calcular el total de experiencia a sumar (misión + recompensas nonmonetary)
+    const totalExperience = mission[0].experience + totalTreeLevelAdded;
+
     if (existingTree.length === 0) {
       await connection.execute(
         "INSERT INTO tree (IDUser, level) VALUES (?, ?)",
-        [IDUser, mission[0].experience]
+        [IDUser, totalExperience]
       );
     } else {
       await connection.execute(
         "UPDATE tree SET level = level + ? WHERE IDUser = ?",
-        [mission[0].experience, IDUser]
+        [totalExperience, IDUser]
       );
     }
 
@@ -303,6 +312,8 @@ const postCompleteMissionUser = async (IDUser, IDMission) => {
         IDMission,
         IDUser,
         experienceGained: mission[0].experience,
+        bonusExperienceFromRewards: totalTreeLevelAdded,
+        totalExperienceGained: totalExperience,
         newTreeLevel: updatedTree[0].level,
         rewardsObtained: userRewards,
         totalRewards: rewards.length,
